@@ -265,8 +265,8 @@ fn trace_ray(ray: &Ray, scene: &Scene, depth: i32, day_time: f32) -> Color {
 
         color.clamp()
     } else {
-        // Sky - use actual day_time for skybox texture blending
-        // Pass sun parameters so the skybox can render a visible sun disk
+        // Sky - use the new procedural skybox with day/night colors
+        // The skybox now generates blue sky for day and purple for night procedurally
         scene.skybox.sample(ray, day_time, -scene.sun.direction, scene.sun.color, scene.sun.intensity)
     }
 }
@@ -339,19 +339,8 @@ impl Clone for crate::light::DirectionalLight {
 
 impl Clone for crate::skybox::Skybox {
     fn clone(&self) -> Self {
-        Self {
-            right_day: self.right_day.clone(),
-            left_day: self.left_day.clone(),
-            top_day: self.top_day.clone(),
-            bottom_day: self.bottom_day.clone(),
-            front_day: self.front_day.clone(),
-            back_day: self.back_day.clone(),
-            right_night: self.right_night.clone(),
-            left_night: self.left_night.clone(),
-            top_night: self.top_night.clone(),
-            bottom_night: self.bottom_night.clone(),
-            front_night: self.front_night.clone(),
-            back_night: self.back_night.clone(),
-        }
+        // El skybox ahora es una estructura vacía que genera colores proceduralmente
+        // así que simplemente devolvemos una nueva instancia
+        Self::new()
     }
 }

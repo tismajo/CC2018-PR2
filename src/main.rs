@@ -24,7 +24,7 @@ const HEIGHT: i32 = 600;
 fn main() {
     let (mut rl, thread) = raylib::init()
         .size(WIDTH, HEIGHT)
-        .title("Casa del Leñador - Raytracer")
+        .title("Farmeador de experiencia MAICRA")
         .build();
 
     rl.set_target_fps(60);
@@ -54,13 +54,14 @@ fn main() {
 
     let mut image_buffer = vec![Color::BLACK; (WIDTH * HEIGHT) as usize];
 
-    // Colores del tema azul
-    let bg_color = Color::new(20, 25, 45, 255);        // Azul oscuro fondo
-    let panel_color = Color::new(30, 40, 70, 220);     // Azul panel
-    let accent_color = Color::new(65, 105, 225, 255);  // Azul royal
-    let light_blue = Color::new(100, 150, 255, 255);   // Azul claro
-    let cyan = Color::new(0, 255, 255, 255);           // Cian para highlights
-    let text_color = Color::new(200, 220, 255, 255);   // Texto azul claro
+    // === TEMA AZUL MEJORADO ===
+    let bg_color       = Color::new(15, 20, 35, 255);     // Fondo azul muy oscuro
+    let panel_color    = Color::new(25, 35, 60, 180);     // Panel semitransparente
+    let panel_border   = Color::new(90, 130, 255, 220);   // Bordes azul brillante
+    let title_color    = Color::new(120, 160, 255, 255);  // Azul claro para títulos
+    let text_color     = Color::new(180, 210, 255, 255);  // Texto azul claro
+    let cyan           = Color::new(0, 220, 255, 255);    // Highlights
+    let light_blue     = Color::new(100, 150, 255, 255);  // Azul para labels
 
     while !rl.window_should_close() {
         let delta_time = rl.get_frame_time();
@@ -82,28 +83,24 @@ fn main() {
             if !auto_quality { quality_level = 2; }
         }
 
-        // Toggle modo auto performance
         if rl.is_key_pressed(KeyboardKey::KEY_P) {
             auto_quality = !auto_quality;
-            if !auto_quality {
-                quality_level = manual_quality_level;
-            }
+            if !auto_quality { quality_level = manual_quality_level; }
         }
 
         if rl.is_key_pressed(KeyboardKey::KEY_T) { 
             use_threading = !use_threading; 
         }
 
-        // Control tiempo día/noche
         if rl.is_key_down(KeyboardKey::KEY_N) {
             day_time = (day_time + 0.01) % 1.0;
         }
 
-        // === Ajuste Automático de Calidad ===
+        // === Auto Calidad ===
         if auto_quality {
             fps_check_timer += delta_time;
-
             fps_history.push(current_fps);
+
             if fps_history.len() > 10 {
                 fps_history.remove(0);
             }
@@ -115,12 +112,9 @@ fn main() {
 
                 if avg_fps < LOW_FPS_THRESHOLD && quality_level < 2 {
                     quality_level += 1;
-                    println!("Auto: Bajando calidad (FPS: {})", avg_fps);
-                }
-                else if avg_fps > HIGH_FPS_THRESHOLD && quality_level > 0 {
+                } else if avg_fps > HIGH_FPS_THRESHOLD && quality_level > 0 {
                     if quality_level > manual_quality_level {
                         quality_level -= 1;
-                        println!("Auto: Subiendo calidad (FPS: {})", avg_fps);
                     }
                 }
             }
@@ -129,9 +123,9 @@ fn main() {
         scene.update_sun_position(day_time);
 
         let render_scale = match quality_level {
-            0 => 4,  // Baja: 4x downscale
-            1 => 2,  // Media: 2x downscale
-            _ => 1,  // Alta: Resolución nativa
+            0 => 4,
+            1 => 2,
+            _ => 1,
         };
 
         renderer::render_scene(
@@ -147,26 +141,24 @@ fn main() {
 
         let mut d = rl.begin_drawing(&thread);
         
-        // Fondo azul oscuro
         d.clear_background(bg_color);
-        
-        // Dibujar buffer de renderizado
         draw_buffer(&mut d, &image_buffer, WIDTH, HEIGHT);
 
-        // === PANEL DE INFORMACIÓN - Estilo azul ===
-        let panel_width = 250;
-        let panel_height = 180;
+        // === PANEL DE INFORMACIÓN ===
         let panel_x = 10;
         let panel_y = 10;
-        
-        // Panel semi-transparente
+        let panel_width = 250;
+        let panel_height = 180;
+
         d.draw_rectangle(panel_x, panel_y, panel_width, panel_height, panel_color);
-        d.draw_rectangle_lines(panel_x, panel_y, panel_width, panel_height, accent_color);
+        d.draw_rectangle_lines_ex(
+            Rectangle::new(panel_x as f32, panel_y as f32, panel_width as f32, panel_height as f32),
+            2.0,
+            panel_border
+        );
 
-        // Título del panel
-        d.draw_text("CASA DEL LEÑADOR", panel_x + 10, panel_y + 5, 16, light_blue);
+        d.draw_text("Farming de experiencia", panel_x + 10, panel_y + 5, 16, title_color);
 
-        // Información de rendimiento
         let fps = d.get_fps();
         let fps_color = if fps >= 50 {
             Color::GREEN
@@ -175,96 +167,70 @@ fn main() {
         } else {
             Color::RED
         };
-        
-        d.draw_text(&format!("FPS: {}", fps), panel_x + 15, panel_y + 30, 18, fps_color);
 
-        // Información de calidad
+        d.draw_text(&format!("FPS: {}", fps), panel_x + 15, panel_y + 30, 18, text_color);
+
         let (quality_text, quality_color) = match quality_level {
             0 => ("BAJA (4x)", Color::ORANGE),
             1 => ("MEDIA (2x)", light_blue),
             _ => ("ALTA (1x)", Color::LIME),
         };
-        
-        d.draw_text(&format!("CALIDAD: {}", quality_text), panel_x + 15, panel_y + 55, 16, quality_color);
 
-        // Estado auto-calidad
-        if auto_quality {
-            d.draw_text("MODO AUTO", panel_x + 150, panel_y + 55, 14, cyan);
-        }
-
-        // Información de renderizado
-        let pixels_rendered = ((WIDTH * HEIGHT) / (render_scale * render_scale)) as f32;
-        let percentage = (pixels_rendered / (WIDTH * HEIGHT) as f32) * 100.0;
         d.draw_text(
-            &format!("PIXELS: {:.0}%", percentage),
-            panel_x + 15, panel_y + 80,
-            14,
-            text_color,
+            &format!("CALIDAD: {}", quality_text),
+            panel_x + 15,
+            panel_y + 55,
+            16,
+            quality_color
         );
 
-        // Información adicional
-        d.draw_text(&format!("HILOS: {}", if use_threading { "ON" } else { "OFF" }), 
-                   panel_x + 15, panel_y + 100, 14, text_color);
-        d.draw_text(&format!("HORA: {:.2}", day_time), 
-                   panel_x + 15, panel_y + 120, 14, Color::YELLOW);
+        let pixels_rendered = ((WIDTH * HEIGHT) / (render_scale * render_scale)) as f32;
+        let percentage = (pixels_rendered / (WIDTH * HEIGHT) as f32) * 100.0;
 
-        // Dirección del sol (debug)
-        d.draw_text(&format!("SOL: ({:.1}, {:.1}, {:.1})", 
-            -scene.sun.direction.x, -scene.sun.direction.y, -scene.sun.direction.z), 
-            panel_x + 15, panel_y + 140, 12, Color::ORANGE);
+        d.draw_text(&format!("PIXELS: {:.0}%", percentage),
+            panel_x + 15, panel_y + 80, 14, text_color);
 
-        // === PANEL DE CONTROLES - Parte inferior ===
+        d.draw_text(&format!("HILOS: {}", if use_threading { "ON" } else { "OFF" }),
+            panel_x + 15, panel_y + 100, 14, text_color);
+
+        d.draw_text(&format!("HORA: {:.2}", day_time),
+            panel_x + 15, panel_y + 120, 14, text_color);
+            
+        // === PANEL CONTROLES ===
         let controls_panel_height = 90;
         let controls_y = HEIGHT - controls_panel_height - 10;
-        
-        d.draw_rectangle(panel_x, controls_y, panel_width, controls_panel_height, panel_color);
-        d.draw_rectangle_lines(panel_x, controls_y, panel_width, controls_panel_height, accent_color);
-        
-        d.draw_text("=== CONTROLES ===", panel_x + 10, controls_y + 5, 16, light_blue);
-        
-        // Controles en dos columnas
-        d.draw_text("WASD: Mirar", panel_x + 15, controls_y + 25, 14, text_color);
-        d.draw_text("Q/E: Subir/Bajar", panel_x + 15, controls_y + 45, 14, text_color);
-        d.draw_text("FLECHAS: Rotar/Zoom", panel_x + 120, controls_y + 25, 14, text_color);
-        d.draw_text("N: Día/Noche", panel_x + 120, controls_y + 45, 14, text_color);
-        
-        d.draw_text("1/2/3: Calidad | P: Auto | T: Hilos", 
-                   panel_x + 15, controls_y + 65, 12, Color::LIGHTGRAY);
 
-        // === INFORMACIÓN ADICIONAL EN ESQUINA SUPERIOR DERECHA ===
-        let info_x = WIDTH - 200;
-        d.draw_text("RENDER: RAYTRACING", info_x, 15, 14, cyan);
-        d.draw_text("ESCENA: BOSQUE", info_x, 35, 14, text_color);
-        d.draw_text("TEXTURAS: 64x64", info_x, 55, 14, text_color);
+        d.draw_rectangle(panel_x, controls_y, panel_width, controls_panel_height, panel_color);
+        d.draw_rectangle_lines_ex(
+            Rectangle::new(panel_x as f32, controls_y as f32, panel_width as f32, controls_panel_height as f32),
+            2.0,
+            panel_border
+        );
     }
 }
 
 fn handle_camera_input(rl: &RaylibHandle, camera: &mut Camera, delta_time: f32) {
-    // Velocidades de control (unidades/grados por segundo)
     let rotation_speed = 60.0;
     let zoom_speed = 10.0;
     let vertical_speed = 5.0;
 
-    // Calcular cantidades basadas en delta_time
     let rotate_amount = rotation_speed * delta_time;
     let zoom_amount = zoom_speed * delta_time;
     let vertical_amount = vertical_speed * delta_time;
 
-    // === WASD - Control de Vista ===
     if rl.is_key_down(KeyboardKey::KEY_W) {
-        camera.rotate_vertical(rotate_amount); // Mirar ARRIBA
+        camera.rotate_vertical(rotate_amount);
     }
     if rl.is_key_down(KeyboardKey::KEY_S) {
-        camera.rotate_vertical(-rotate_amount); // Mirar ABAJO
+        camera.rotate_vertical(-rotate_amount);
     }
     if rl.is_key_down(KeyboardKey::KEY_A) {
-        camera.rotate_around_target(-rotate_amount); // Mirar IZQUIERDA
+        camera.rotate_around_target(-rotate_amount);
     }
     if rl.is_key_down(KeyboardKey::KEY_D) {
-        camera.rotate_around_target(rotate_amount); // Mirar DERECHA
+        camera.rotate_around_target(rotate_amount);
     }
 
-    // === Flechas - Rotación y Zoom ===
     if rl.is_key_down(KeyboardKey::KEY_LEFT) {
         camera.rotate_around_target(-rotate_amount);
     }
@@ -272,15 +238,13 @@ fn handle_camera_input(rl: &RaylibHandle, camera: &mut Camera, delta_time: f32) 
         camera.rotate_around_target(rotate_amount);
     }
 
-    // === Flechas - Zoom ===
     if rl.is_key_down(KeyboardKey::KEY_UP) {
-        camera.zoom(-zoom_amount); // Zoom IN
+        camera.zoom(-zoom_amount);
     }
     if rl.is_key_down(KeyboardKey::KEY_DOWN) {
-        camera.zoom(zoom_amount); // Zoom OUT
+        camera.zoom(zoom_amount);
     }
 
-    // === Q/E - Mover Cámara Arriba/Abajo ===
     if rl.is_key_down(KeyboardKey::KEY_Q) {
         camera.move_up(vertical_amount);
     }
