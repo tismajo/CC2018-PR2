@@ -41,6 +41,7 @@ Un raytracer 3D en tiempo real escrito en Rust que muestra una casa de leñador 
 ## Video funcionamiento
 [<video controls src="Screen Recording 2025-11-18 215049.mp4" title="Title"></video>
 ](https://github.com/tismajo/CC2018-PR2/blob/main/Screen%20Recording%202025-11-18%20215049.mp4)
+En caso que no aparezca, abrir el archivo Screen Recording 2025-11-18 215049.mp4
 
 ## 📊 Rendimiento
 
