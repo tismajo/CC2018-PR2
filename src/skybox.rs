@@ -1,7 +1,7 @@
 use crate::color::Color;
 use crate::ray::Ray;
 use crate::texture::Texture;
-use crate::utils::Vec3;
+use crate::mate::Vec3;
 
 pub struct Skybox {
     // Ya no necesitamos las texturas de imagen

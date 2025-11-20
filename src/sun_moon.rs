@@ -1,7 +1,7 @@
 use crate::obj_loader::Mesh;
 use crate::material::Material;
 use crate::color::Color;
-use crate::utils::Vec3;
+use crate::mate::Vec3;
 use crate::ray::Ray;
 use crate::intersection::Intersection;
 

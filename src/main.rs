@@ -1,22 +1,22 @@
 use raylib::prelude::*;
 
-mod camera;
+mod camara;
 mod ray;
 mod material;
 mod texture;
 mod color;
-mod scene;
-mod cube;
-mod light;
-mod point_light;
+mod minecraft;
+mod cubo;
+mod luz;
+mod fuente_luz;
 mod skybox;
-mod obj_loader;
+mod mesh;
 mod intersection;
 mod renderer;
-mod utils;
+mod mate;
 
-use camera::Camera;
-use scene::Scene;
+use camara::Camera;
+use minecraft::Scene;
 
 const WIDTH: i32 = 800;
 const HEIGHT: i32 = 600;
@@ -33,8 +33,8 @@ fn main() {
     scene.build_lumberjack_house_scene();
 
     let mut camera = Camera::new(
-        utils::Vec3::new(0.0, 5.0, 15.0),
-        utils::Vec3::new(0.0, 0.0, 0.0),
+        mate::Vec3::new(0.0, 5.0, 15.0),
+        mate::Vec3::new(0.0, 0.0, 0.0),
         70.0,
         WIDTH as f32 / HEIGHT as f32,
     );

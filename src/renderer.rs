@@ -1,5 +1,5 @@
-use crate::scene::Scene;
-use crate::camera::Camera;
+use crate::minecraft::Scene;
+use crate::camara::Camera;
 use crate::ray::Ray;
 use crate::color::Color;
 
@@ -292,7 +292,7 @@ impl Clone for Scene {
     }
 }
 
-impl Clone for crate::cube::Cube {
+impl Clone for crate::cubo::Cube {
     fn clone(&self) -> Self {
         Self {
             position: self.position,
@@ -305,7 +305,7 @@ impl Clone for crate::cube::Cube {
     }
 }
 
-impl Clone for crate::obj_loader::Mesh {
+impl Clone for crate::mesh::Mesh {
     fn clone(&self) -> Self {
         Self {
             triangles: self.triangles.iter().map(|t| t.clone()).collect(),
@@ -316,7 +316,7 @@ impl Clone for crate::obj_loader::Mesh {
     }
 }
 
-impl Clone for crate::obj_loader::Triangle {
+impl Clone for crate::mesh::Triangle {
     fn clone(&self) -> Self {
         Self {
             v0: self.v0,
@@ -327,7 +327,7 @@ impl Clone for crate::obj_loader::Triangle {
     }
 }
 
-impl Clone for crate::light::DirectionalLight {
+impl Clone for crate::luz::DirectionalLight {
     fn clone(&self) -> Self {
         Self {
             direction: self.direction,

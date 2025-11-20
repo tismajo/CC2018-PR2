@@ -1,14 +1,14 @@
 use crate::color::Color;
-use crate::cube::Cube;
+use crate::cubo::Cube;
 use crate::intersection::Intersection;
-use crate::light::DirectionalLight;
+use crate::luz::DirectionalLight;
 use crate::material::Material;
-use crate::obj_loader::Mesh;
-use crate::point_light::PointLight;
+use crate::mesh::Mesh;
+use crate::fuente_luz::PointLight;
 use crate::ray::Ray;
 use crate::skybox::Skybox;
 use crate::texture::Texture;
-use crate::utils::Vec3;
+use crate::mate::Vec3;
 
 pub struct Scene {
     pub cubes: Vec<Cube>,

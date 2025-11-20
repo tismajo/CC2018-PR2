@@ -1,5 +1,5 @@
 use crate::color::Color;
-use crate::utils::clamp;
+use crate::mate::clamp;
 use image::GenericImageView;
 
 #[derive(Clone)]
